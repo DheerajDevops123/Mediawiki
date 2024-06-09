@@ -1,0 +1,82 @@
+- name: Configure Apache DocumentRoot and DirectoryIndex
+  hosts: your_target_host
+  become: true
+  tasks:
+    - name: Set DocumentRoot in Apache configuration
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf  
+        regexp: "^DocumentRoot"
+        line: "DocumentRoot \"/var/www\""
+
+    - name: Set DirectoryIndex in Apache configuration
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf  
+        regexp: "^<Directory \"/var/www\">"
+        line: "DirectoryIndex index.html index.html.var index.php"
+
+    - name: Create symbolic link to MediaWiki directory
+      ansible.builtin.file:
+        src: mediawiki-1.41.1
+        dest: /var/www/mediawiki
+        state: link
+
+    - name: Change ownership of MediaWiki directory
+      ansible.builtin.file:
+        path: /var/www/mediawiki-1.41.1
+        owner: apache
+        group: apache
+        recurse: yes
+
+    - name: Change ownership of /var/www/mediawiki
+      ansible.builtin.file:
+        path: /var/www/mediawiki
+        owner: apache
+        group: apache
+        recurse: yes
+    
+    - name: Restart HTTPD service
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+
+    - name: Add HTTP service to firewall
+      ansible.builtin.firewalld:
+        service: http
+        zone: public
+        permanent: yes
+        state: enabled
+
+    - name: Add HTTPS service to firewall
+      ansible.builtin.firewalld:
+        service: https
+        zone: public
+        permanent: yes
+        state: enabled
+
+    - name: Restart firewalld service
+      ansible.builtin.service:
+        name: firewalld
+        state: restarted
+
+    - name: Run getenforce command
+      ansible.builtin.command: getenforce
+      register: selinux_mode
+
+    - name: Display SELinux enforcement mode
+      ansible.builtin.debug:
+        msg: "SELinux enforcement mode is {{ selinux_mode.stdout }}"
+
+    - name: Restore SELinux context for /var/www/mediawiki-1.41.1/
+      ansible.builtin.command: restorecon -FR /var/www/mediawiki-1.41.1/
+
+    - name: Restore SELinux context for /var/www/mediawiki
+      ansible.builtin.command: restorecon -FR /var/www/mediawiki
+  
+  - name: List permissions and SELinux context of /var/www/
+      ansible.builtin.shell: ls -lZ /var/www/
+
+  - name: Change directory to /etc/selinux
+      ansible.builtin.shell: cd /etc/selinux && ls -l
+      
+  - name: Edit config file using vi
+      ansible.builtin.shell: vi config

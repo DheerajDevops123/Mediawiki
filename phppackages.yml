@@ -1,0 +1,61 @@
+---
+# Installing the PHP and Required Packages
+- name: Configure PHP and install required packages
+  hosts: your_target_host
+  become: yes
+  tasks:
+    - name: Reset PHP module
+      dnf:
+        name: '*'
+        state: absent
+        module_stream: php
+      when: ansible_distribution_major_version == "8"  
+
+    - name: Enable PHP 7.4 module
+      dnf:
+        name: php:7.4
+        state: present
+        enablerepo: ""
+      when: ansible_distribution_major_version == "8"  
+
+    - name: Install required packages
+      dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - httpd
+        - php
+        - php-mysqlnd
+        - php-gd
+        - php-xml
+        - mariadb-server
+        - mariadb
+        - php-mbstring
+        - php-json
+        - mod_ssl
+        - php-intl
+        - php-apcu
+
+    - name: Start MariaDB service
+      systemd:
+        name: mariadb
+        state: started
+
+    - name: Log into MySQL
+      mysql_user:
+        name: root
+        password: your_root_password
+        login_user: root
+        login_password: your_root_password
+        host_all: yes
+        priv: "*.*:ALL,GRANT"
+        state: present
+      become: yes
+
+    - name: Run SQL script
+      mysql_db:
+        login_user: root
+        login_password: your_root_password
+        login_host: localhost
+        name: "database.sql"
+      become: yes

@@ -1,10 +1,11 @@
 ---
+# Installing CentOS using Ansible Playbook
 - name: Install Required Packages on CentOS
   hosts: your_host_group
   become: yes  
 
   tasks:
-    - name: Install CentOS Software Collections Repository
+    - name: Install CentOS Software Collections 
       yum:
         name: centos-release-scl
         state: present
