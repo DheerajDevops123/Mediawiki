@@ -2,7 +2,8 @@
 # Installing the PHP and Required Packages
 - name: Configure PHP and install required packages
   hosts: localhost
-  become: yes
+  connection: local
+  
   tasks:
     - name: Reset PHP module
       dnf:
