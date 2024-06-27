@@ -1,8 +1,8 @@
 ---
-# Installing CentOS using Ansible Playbook
+# Installing yum modules on Linux using Ansible Playbook
 - name: Install Required Packages on CentOS
-  hosts: your_host_group
-  become: yes  
+  hosts: localhost
+  connection: local
 
   tasks:
     - name: Install CentOS Software Collections 
