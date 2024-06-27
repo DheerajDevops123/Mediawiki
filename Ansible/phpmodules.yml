@@ -1,7 +1,7 @@
 ---
 # Installing the PHP and Required Packages
 - name: Configure PHP and install required packages
-  hosts: your_target_host
+  hosts: localhost
   become: yes
   tasks:
     - name: Reset PHP module
