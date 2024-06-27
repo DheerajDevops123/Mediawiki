@@ -60,3 +60,14 @@
         login_host: localhost
         name: "database.sql"
       become: yes
+
+    tasks:
+    - name: Start MariaDB service
+      ansible.builtin.systemd:
+        name: mariadb
+        state: started
+      become: true  
+
+    - name: Run mysql_secure_installation
+      ansible.builtin.shell: |
+        mysql_secure_installation 

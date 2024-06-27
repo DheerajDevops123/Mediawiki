@@ -7,7 +7,7 @@
   tasks:
     - name: Install CentOS Software Collections 
       yum:
-        name: centos-release-scl
+        name: centos-release
         state: present
       ignore_errors: yes
 
