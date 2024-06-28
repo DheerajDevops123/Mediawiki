@@ -1,5 +1,5 @@
 - hosts : all
-  remote_user : localhost
+  remote_user : mediawikiuser
   become : yes
   vars_files: mysql.yaml
   tasks :
