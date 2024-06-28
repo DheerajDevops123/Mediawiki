@@ -73,7 +73,7 @@
     - name: Starting mariadb at daemon level
       command: systemctl start mariadb
     - name: Ensure root user can only login from localhost
-      mysql_user:
+      community.mysql.mysql_user:
         login_password: "{{ mysql_root_password }}"
         check_implicit_admin: yes
         name: root
