@@ -1,4 +1,5 @@
 # Installing the Mediawiki Application
+---
 - hosts : all
   remote_user : localhost
   become : yes
