@@ -45,7 +45,7 @@
       - wget
 	    - dnf
 
-    - name : IAchieving task to Install the mariadb packages using the dnf module
+    - name : Achieving task to Install the mariadb packages using the dnf module
       dnf :
         name : "{{item}}"
         state : present
