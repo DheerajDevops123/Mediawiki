@@ -82,100 +82,71 @@
         src: mysql.conf.j2
         dest: /root/.my.cnf
 
-    - name: Reloading the privileges tables
+    - name: Run MySQL command for root user login to DB
+      command: mysql -u root -p{{ mysql_pwd }} 
+      
+    - name: Creating the New Database
+      mysql_db: name=wikidatabase state=present login_user=root login_password="{{ mysql_pwd }}"
+
+    - name: Creating new User and providing permission to the Database
+      mysql_user:
+        login_user: root
+        login_password: "{{ mysql_pwd }}"
+        name : wiki
+        password: "{{ mysql_user_pwd }}"
+        priv: '*.*:ALL'
+        state: present
+
+    - name: Reloading the privilege tables
       command: |
         mysql -p{{ mysql_pwd }} -ne "{{ item }}"
       with_items:
         - FLUSH PRIVILEGES
       changed_when: False
 
-    - name: Remove anonymous users
-      command: |
-        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
-      with_items:
-        - DELETE FROM mysql.user WHERE User=''
-      changed_when: False
+    - name: Run MySQL command to show databases
+      mysql: 
+        query: |
+          SHOW DATABASES;
+          SHOW GRANTS FOR 'wiki'
 
-    - name: Disallow root login remotely
-      command: |
-        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
-      with_items:
-        - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
-      changed_when: False
-
-    - name: Remove test database and access to it
-      command: |
-        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
-      with_items:
-        - DROP DATABASE IF EXISTS test
-        - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
-      changed_when: False
-
-    - name: Reload privilege tables
-      command: |
-        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
-      with_items:
-        - FLUSH PRIVILEGES
-      changed_when: False
-
-    - name: Delete .my.conf
-      file:
-        path: /root/.my.cnf
-        state: absent
-    - name: create a new database
-      mysql_db: name=wikidatabase state=present login_user=root login_password="{{ mysql_root_password }}"
-    - name: Creating a user and providing permission to database
-      mysql_user:
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        name : rajesh
-        priv: '*.*:ALL'
-        state: present
-
-    - name: Reload privilege tables
-      command: |
-        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
-      with_items:
-        - FLUSH PRIVILEGES
-      changed_when: False
-
-    - name: Enabling mariadb on daemon level
+    - name: Enabling mariadb on Daemon level
       command: systemctl enable mariadb
 
-    - name: Enabling httpd on daemon level
+    - name: Enabling httpd server on Daemon level
       command: systemctl enable httpd
 
     - name : Downloading the MediWiki Source code
       get_url :
-        url : https://releases.wikimedia.org/mediawiki/1.38/mediawiki-1.38.2.tar.gz
-        dest : /home/centos
+        url : https://releases.wikimedia.org/mediawiki/1.42/mediawiki-1.42.1.tar.gz
+        dest : /home/mediawikiuser
         mode : '777'
 
-    - name: Import a key from a url
+    - name: Importing the gpg key from the Url
       get_url:
-        url: https://releases.wikimedia.org/mediawiki/1.38/mediawiki-1.38.2.tar.gz.sig
-        dest : /home/centos
+        url: https://releases.wikimedia.org/mediawiki/1.42/mediawiki-1.42.1.tar.gz.sig
+        dest : /home/mediawikiuser
         mode: '777'
 
     - name : Untar the downloaded mediawiki tar file
       unarchive :
-        src : /home/centos/mediawiki-1.38.2.tar.gz
+        src : /home/centos/mediawiki-1.42.1.tar.gz
         dest : /var/www
         remote_src : yes
 
-    - name: Creating symbolic link for mediawiki-1.38.2
+    - name: Creating sym link for mediawiki-1.42.1
       file:
-        src: /var/www/mediawiki-1.38.2/
+        src: /var/www/mediawiki-1.42.1/
         dest: /var/www/mediawiki
         state: link
 
-    - name : Changing Apache to look at /var/www
+    - name : Changing Apache to look at default
       lineinfile :
         path : /etc/httpd/conf/httpd.conf
         regexp : DocumentRoot "/var/www/html"
         line : DocumentRoot "/var/www"
 
-    - name : Changing Apache to look at <Directory "/var/www/html">
+    - name : Changing Apache to look at directory
       lineinfile :
         path : /etc/httpd/conf/httpd.conf
         regexp : <Directory "/var/www/html">
