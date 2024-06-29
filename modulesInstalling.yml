@@ -4,30 +4,30 @@
   become : yes
   vars_files: variables.yaml
   tasks :
-    - name : Installing the yum-utils packages
+    - name : Achieving task to Install the yum-utils packages
       yum :
         name : yum-utils
         state : present
 
-    - name: Installing the Epel repo packages
+    - name: Achieving task to Install the Epel repo packages
       yum:
         name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
         state: present
 
-    - name: Installing the Remi repo packages
+    - name: Achieving task to Install the Remi repo packages
       yum:
         name: https://rpms.remirepo.net/enterprise/remi-release-7.rpm
         state: present
 
-    - name : Installing the centOS packages
+    - name : Achieving task to Install the centOS packages
       yum :
         name : centos-release-scl
         state : present
 
-    - name: Enabling the remi-php7.4
+    - name: Achieving task to Enable the remi-php7.4
       shell: yum-config-manager --enable remi-php7.4
 
-    - name : Installing the PHP packages using Yum module
+    - name : Achieving task to Install the PHP packages using Yum module
       yum :
         name : "{{item}}"
         state : present
@@ -45,7 +45,7 @@
       - wget
 	    - dnf
 
-    - name : Installing the mariadb packages using the dnf module
+    - name : IAchieving task to Install the mariadb packages using the dnf module
       dnf :
         name : "{{item}}"
         state : present
@@ -56,16 +56,16 @@
         - mariadb
         - mod_ssl
 
-    - name: Starting the  MariaDB service at Daemon Level
+    - name: Achieving task to Start MariaDB service at Daemon Level
       systemd:
         name: mariadb
         state: started
 
-    - name: Running the mysql_secure_installation service
+    - name: Achieving task to Run the mysql_secure_installation service
       expect:
         command: mysql_secure_installation
 
-    - name: Configuring the hosts
+    - name: Achieving task to Configure the hosts
       mysql_user:
         login_password: "{{ mysql_pwd }}"
         check_implicit_admin: yes
@@ -77,18 +77,18 @@
         - localhost
         - 127.0.0.1
 
-    - name: Adding the jinja config file
+    - name: Achieving task to Add the jinja config file
       template:
         src: mysql.conf.j2
         dest: /root/.my.cnf
 
-    - name: Run MySQL command for root user login to DB
+    - name: Achieving task to Run MySQL command for root user login to DB
       command: mysql -u root -p{{ mysql_pwd }} 
       
-    - name: Creating the New Database
+    - name: Achieving task to Create the New Database
       mysql_db: name=wikidatabase state=present login_user=root login_password="{{ mysql_pwd }}"
 
-    - name: Creating new User and providing permission to the Database
+    - name: Achieving the task to create new User and provie permission to the Database
       mysql_user:
         login_user: root
         login_password: "{{ mysql_pwd }}"
@@ -97,95 +97,95 @@
         priv: '*.*:ALL'
         state: present
 
-    - name: Reloading the privilege tables
+    - name: Achieving task to Reload the privilege tables
       command: |
         mysql -p{{ mysql_pwd }} -ne "{{ item }}"
       with_items:
         - FLUSH PRIVILEGES
       changed_when: False
 
-    - name: Run MySQL command to show databases
+    - name: Achieving task to Run MySQL command to show databases & granted permissions
       mysql: 
         query: |
           SHOW DATABASES;
           SHOW GRANTS FOR 'wiki'
 
-    - name: Enabling mariadb on Daemon level
+    - name: Achieving task to Enable mariadb on Daemon level
       command: systemctl enable mariadb
 
-    - name: Enabling httpd server on Daemon level
+    - name: Achieving task to Enable httpd server on Daemon level
       command: systemctl enable httpd
 
-    - name : Downloading the MediWiki Source code
+    - name : Achieving task to Download the MediWiki Source code
       get_url :
         url : https://releases.wikimedia.org/mediawiki/1.42/mediawiki-1.42.1.tar.gz
         dest : /home/mediawikiuser
         mode : '777'
 
-    - name: Importing the gpg key from the Url
+    - name: Achieving task to Import the gpg key from the Url
       get_url:
         url: https://releases.wikimedia.org/mediawiki/1.42/mediawiki-1.42.1.tar.gz.sig
         dest : /home/mediawikiuser
         mode: '777'
 
-    - name : Untar the downloaded mediawiki tar file
+    - name : Achieving task to Untar the downloaded mediawiki tar file
       unarchive :
         src : /home/centos/mediawiki-1.42.1.tar.gz
         dest : /var/www
         remote_src : yes
 
-    - name: Creating sym link for mediawiki-1.42.1
+    - name: Achieving task in Creating sym link for mediawiki-1.42.1
       file:
         src: /var/www/mediawiki-1.42.1/
         dest: /var/www/mediawiki
         state: link
 
-    - name : Changing Apache to look at default
+    - name : Achieving task to look Apache into DocumentRoot /var/www
       lineinfile :
         path : /etc/httpd/conf/httpd.conf
         regexp : DocumentRoot "/var/www/html"
         line : DocumentRoot "/var/www"
 
-    - name : Changing Apache to look at directory
+    - name : Achieving task to look Apache into Directory /var/www
       lineinfile :
         path : /etc/httpd/conf/httpd.conf
         regexp : <Directory "/var/www/html">
         line : <Directory "/var/www">
 
-    - name : Changing Apache to look at DirectoryIndex index.html index.html.var index.php
+    - name : Acheving the task to look Apache into DirectoryIndex index.html index.html.var index.php
       lineinfile :
         path : /etc/httpd/conf/httpd.conf
-        regexp :     DirectoryIndex index.html
+        regexp : DirectoryIndex index.html
         line : DirectoryIndex index.html index.html.var index.php
 
-    - name : Changing ownership
-      command : chown -R apache:apache /var/www/mediawiki-1.38.2
+    - name : Achieving task to Change the ownership of the file
+      command : chown -R apache:apache /var/www/mediawiki-1.42.1
 
-    - name : Starting httpd
+    - name : Achieving task to start httpd server
       service :
         name : httpd
         state : restarted
 
-    - name : start firewall
+    - name : Achieving task to start the firewall
       command : systemctl start firewalld
 
-    - name: permit traffic for https service
+    - name: Achieving task to permit traffic for https service
       firewalld:
         service: https
         permanent: yes
         state: enabled
 
-    - name: permit traffic for http service
+    - name: Achieving task to permit traffic for http service
       firewalld:
         service: http
         permanent: yes
         state: enabled
 
-    - name : Restarting firewall
+    - name : Achieving task to Restart the firewall
       command : systemctl restart firewalld
 
-    - name : Enabling https
-      command : restorecon -FR /var/www/mediawiki-1.38.2/
+    - name : Achieving task to Enable https
+      command : restorecon -FR /var/www/mediawiki-1.42.1
       
-    - name : Enabling https
+    - name : Achieving task to Enable https
       command : restorecon -FR /var/www/mediawiki
