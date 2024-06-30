@@ -54,18 +54,18 @@ variable "subnet_cidr_prefix" {
   description = "This variable defines address space for subnetnet"
 }
 
-variable "linux_vm_size" {
+variable "vm_size" {
   type        = string
   description = "Size (SKU) of the virtual machine to create"
 }
 
-variable "linux_vm_image_publisher" {
+variable "vm_image_publisher" {
   type        = string
   description = "Virtual machine source image publisher"
   default     = "RedHat"
 }
 
-variable "linux_vm_image_offer" {
+variable "vm_image_offer" {
   type        = string
   description = "Virtual machine source image offer"
   default     = "RHEL"
@@ -77,14 +77,19 @@ variable "rhel_8_5_sku" {
   default     = "8_5"
 }
 
-variable "linux_admin_username" {
+variable "username" {
   type        = string
-  description = "Username for Virtual Machine administrator account"
+  description = "Username for Virtual Machine account"
 }
 
 variable "app" {
   type        = string
   description = "Application name"
+}
+
+variable "password" {
+  type        = string
+  description = "password for virtual machine"
 }
 
 variable "azure-subscription-id" {
@@ -105,10 +110,4 @@ variable "azure-client-secret" {
 variable "azure-tenant-id" {
   type        = string
   description = "Azure Tenant ID"
-}
-
-output "linux_vm_admin_password" {
-  description = "Administrator password for the Virtual Machine"
-  value       = random_password.linux-vm-password.result
-  sensitive   = true
 }

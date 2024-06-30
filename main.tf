@@ -10,10 +10,10 @@ terraform {
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
   features {}
-  subscription_id = var.azure-subscription-id
-  client_id       = var.azure-client-id
-  client_secret   = var.azure-client-secret
-  tenant_id       = var.azure-tenant-id
+  subscription_id = "${var.azure-subscription-id}"
+  client_id       = "${var.azure-client-id}"
+  client_secret   = "${var.azure-client-secret}"
+  tenant_id       = "${var.azure-tenant-id}"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -81,11 +81,11 @@ resource "azurerm_linux_virtual_machine" "vm" {
   resource_group_name   = azurerm_resource_group.rg.name
   name                  = "${var.vmname}"
   network_interface_ids = [azurerm_network_interface.linux-vm-nic.id]
-  size                  = "${var.linux_vm_size}"
+  size                  = "${var.vm_size}"
 
   source_image_reference {
-    offer     = "${var.linux_vm_image_offer}"
-    publisher = "${var.linux_vm_image_publisher}"
+    offer     = "${var.vm_image_offer}"
+    publisher = "${var.vm_image_publisher}"
     sku       = "${var.rhel_8_5_sku}"
     version   = "latest"
   }
@@ -95,8 +95,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
     storage_account_type = "Standard_LRS"
   }
 
-  admin_username = "${var.linux_admin_username}"
-  admin_password = random_password.linux-vm-password.result
+  admin_username = "${var.username}"
+  admin_password = "${var.password}"
 
   disable_password_authentication = false
 
